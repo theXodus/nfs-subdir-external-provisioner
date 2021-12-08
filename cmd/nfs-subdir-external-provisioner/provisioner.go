@@ -141,10 +141,16 @@ func (p *nfsProvisioner) Provision(ctx context.Context, options controller.Provi
 	}
 	os.Chmod(fullPath, createMode)
 	os.Chown(fullPath, uid, gid)
-
+	
+	customPVName := options.PVName
+	annotationPVName, exists := metadata.annotations["nfs.io/PVName"]
+	if exists {
+		customPVName = annotationPVName
+	}
+	
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: options.PVName,
+			Name: customPVName,
 		},
 		Spec: v1.PersistentVolumeSpec{
 			PersistentVolumeReclaimPolicy: *options.StorageClass.ReclaimPolicy,
